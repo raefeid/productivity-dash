@@ -1,0 +1,59 @@
+name: Daily Dashboard Update
+
+on:
+  schedule:
+    # Run at 8 AM UTC+2 (6 AM UTC daily)
+    # To change time: modify the cron expression below
+    # Format: minute hour day month day-of-week
+    # Current: 6 AM UTC = 8 AM UTC+2 ✅
+    - cron: '0 6 * * *'
+
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # 2. Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 3. Run the update script
+      - name: Update dashboard with fresh data
+        env:
+          CLOCKIFY_API_KEY: ${{ secrets.CLOCKIFY_API_KEY }}
+          AZURE_PAT: ${{ secrets.AZURE_PAT }}
+          AZURE_ORG: ${{ secrets.AZURE_ORG }}
+        run: node update-dashboard.js
+
+      # 4. Configure Git
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      # 5. Commit and push changes
+      - name: Commit changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add clockify-dashboard.html vacation-days.json
+            git commit -m "🔄 Auto-update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+            git push
+          fi
+
+      # 6. Notify on failure
+      - name: Notify on failure
+        if: failure()
+        run: echo "❌ Dashboard update failed. Check the logs above."
