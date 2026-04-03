@@ -305,7 +305,8 @@ with tab_ov:
     fig_daily = go.Figure()
     fig_daily.add_trace(go.Bar(name="Development", x=df_daily["d"], y=df_daily["dev"], marker_color=DEV_COLOR))
     fig_daily.add_trace(go.Bar(name="Meetings", x=df_daily["d"], y=df_daily["mtg"], marker_color=MTG_COLOR))
-    fig_daily.add_vrect(x0="Mar 19", x1="Mar 23", fillcolor="rgba(0,0,0,0.06)", line_width=0, annotation_text="Eid Holiday", annotation_position="top")
+    fig_daily.add_shape(type="rect", x0="Mar 19", x1="Mar 23", y0=0, y1=1, yref="paper", fillcolor="rgba(0,0,0,0.06)", line_width=0)
+    fig_daily.add_annotation(x="Mar 21", y=1.05, yref="paper", text="Eid Holiday", showarrow=False, font=dict(size=10, color="#718096"))
     fig_daily.update_layout(barmode="stack", height=250, margin=dict(t=30, b=30),
                             legend=dict(orientation="h", yanchor="bottom", y=1.02))
     fig_daily.update_yaxes(title_text="Hours")
